@@ -1,0 +1,14 @@
+resources:
+- clusterissuer.yaml
+- db-secret.yaml
+- db-statefulset.yaml
+- fastapi-deployment.yaml
+- hpa-fastapi.yaml
+- ingress.yaml
+- pgadmin-deployment.yaml
+- pgadmin-secret.yaml
+- pvc.yaml 
+
+commonLabels:
+  owner: TerenceH
+  

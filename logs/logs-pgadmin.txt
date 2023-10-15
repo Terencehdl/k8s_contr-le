@@ -1,0 +1,10 @@
+NOTE: Configuring authentication for SERVER mode.
+
+pgAdmin 4 - Application Initialisation
+======================================
+
+postfix/postlog: starting the Postfix mail system
+[2023-10-15 20:13:54 +0000] [1] [INFO] Starting gunicorn 20.1.0
+[2023-10-15 20:13:54 +0000] [1] [INFO] Listening at: http://[::]:80 (1)
+[2023-10-15 20:13:54 +0000] [1] [INFO] Using worker: gthread
+[2023-10-15 20:13:54 +0000] [91] [INFO] Booting worker with pid: 91

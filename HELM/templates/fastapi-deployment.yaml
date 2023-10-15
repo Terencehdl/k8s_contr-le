@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-fastapi-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fastapi
+  template:
+    metadata:
+      labels:
+        app: fastapi
+    spec:
+      containers:
+        - name: fastapi-container
+          image: {{ .Values.fastapiValues.image.repository }}:{{ .Values.fastapiValues.image.tag }}
+          ports:
+            - containerPort: {{ .Values.fastapiValues.containerPort }}
+          env:
+            - name: POSTGRES_HOST
+              value: {{ .Values.fastapiValues.database.host }}
+            - name: POSTGRES_PORT
+              value: {{ quote .Values.fastapiValues.database.port }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.fastapiValues.database.secretName }}
+                  key: {{ .Values.fastapiValues.database.secretKeyUser }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.fastapiValues.database.secretName }}
+                  key: {{ .Values.fastapiValues.database.secretKeyPassword }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-service
+spec:
+  selector:
+    app: fastapi
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000

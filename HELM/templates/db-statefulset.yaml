@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-db-statefulset
+spec:
+  serviceName: {{ .Values.dbValues.statefulSet.serviceName }}
+  replicas: {{ .Values.dbValues.statefulSet.replicas }}
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: {{ .Values.dbValues.image.repository }}:{{ .Values.dbValues.image.tag }}
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.dbValues.databaseName }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.fastapiValues.database.secretName }}
+                  key: {{ .Values.fastapiValues.database.secretKeyUser }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.fastapiValues.database.secretName }}
+                  key: {{ .Values.fastapiValues.database.secretKeyPassword }}
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:  
+        dataSource:
+          name: pvc  # Référence au nom du PVC existant
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

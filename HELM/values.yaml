@@ -1,0 +1,70 @@
+service:
+  port: 80
+serviceAccount:
+  create: false
+ingress:
+  enabled: true
+# its working
+
+#fastapi
+fastapiValues:
+  replicaCount: 3
+  containerPort: 5000
+  image:
+    repository: terencehdl/fastapi
+    tag: 1.0.1
+  database:
+    host: db-service
+    port: "5432"
+    secretName: db-secret
+    secretKeyUser: POSTGRES_USER
+    secretKeyPassword: POSTGRES_PASSWORD
+
+#pgadmin
+pgadminValues:
+  containerPort: 80
+  replicaCount: 1
+  image:
+    repository: dpage/pgadmin4
+    tag: latest
+  pgadminSecret:
+    name: pgadmin-secret
+    emailKey: PGADMIN_DEFAULT_EMAIL
+    passwordKey: PGADMIN_DEFAULT_PASSWORD
+
+#db
+dbValues:
+  statefulSet:
+    serviceName: db-service
+    replicas: 1
+  image:
+    repository: postgres
+    tag: 12.0-alpine
+  databaseName: storedb
+  volumeClaimTemplates:
+    - name: postgres-data
+      accessModes:
+        - ReadWriteOnce
+
+
+#hpa
+hpaValues:
+  name: hpa-fastapi
+  namespace: helm
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+  minReplicas: 3
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+#pvc
+pvcValues:
+  name: pvc
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+

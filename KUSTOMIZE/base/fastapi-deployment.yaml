@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fastapi
+  template:
+    metadata:
+      labels:
+        app: fastapi
+    spec:
+      containers:
+        - name: fastapi-container
+          image: terencehdl/fastapi:1.0.1
+          ports:
+            - containerPort: 5000
+          env:
+            - name: POSTGRES_HOST
+              value: db-service # Remplacez par le nom du service PostgreSQL
+            - name: POSTGRES_PORT
+              value: "5432" # Port PostgreSQL par défaut
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret 
+                  key: POSTGRES_USER 
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret 
+                  key: POSTGRES_PASSWORD
+                
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-service
+spec:
+  selector:
+    app: fastapi
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
